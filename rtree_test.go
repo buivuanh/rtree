@@ -657,7 +657,7 @@ func rSaneRect(r rect[float64]) error {
 func rSaneNode[T comparable](tr *RTreeG[T], r rect[float64], n *node[float64, T],
 	height int, isroot bool,
 ) error {
-	if int(n.count) > maxEntries {
+	if n.count > maxEntries {
 		return errors.New("invalid count: max entries")
 	}
 	if n.leaf() && height != 0 {

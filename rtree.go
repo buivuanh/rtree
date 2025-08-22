@@ -31,7 +31,11 @@ import (
 // `RTreeGN[N,T].newNode(leaf bool)` which take a bool that indicates the new
 // node kind is a `leaf` or `branch`.
 
-const maxEntries = 64
+var (
+	// make MaxEntries is configurable
+	maxEntries = int16(64)
+)
+
 const orderBranches = true
 const orderLeaves = true
 
@@ -40,8 +44,8 @@ var gcow uint64
 
 type numeric interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
-		~float32 | ~float64
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+	~float32 | ~float64
 }
 
 type RTreeGN[N numeric, T any] struct {
@@ -85,7 +89,7 @@ type node[N numeric, T any] struct {
 	icow  uint64
 	kind  kind
 	count int16
-	rects [maxEntries]rect[N]
+	rects []rect[N]
 }
 
 func (n *node[N, T]) leaf() bool {
@@ -94,12 +98,12 @@ func (n *node[N, T]) leaf() bool {
 
 type leafNode[N numeric, T any] struct {
 	node[N, T]
-	items [maxEntries]T
+	items []T
 }
 
 type branchNode[N numeric, T any] struct {
 	node[N, T]
-	children [maxEntries]*node[N, T]
+	children []*node[N, T]
 }
 
 func (n *node[N, T]) children() []*node[N, T] {
@@ -120,10 +124,10 @@ func (n *node[N, T]) items() []T {
 
 func (tr *RTreeGN[N, T]) newNode(isleaf bool) *node[N, T] {
 	if isleaf {
-		n := &leafNode[N, T]{node: node[N, T]{icow: tr.icow, kind: leaf}}
+		n := &leafNode[N, T]{node: node[N, T]{icow: tr.icow, kind: leaf, rects: make([]rect[N], maxEntries)}, items: make([]T, maxEntries)}
 		return (*node[N, T])(unsafe.Pointer(n))
 	} else {
-		n := &branchNode[N, T]{node: node[N, T]{icow: tr.icow, kind: branch}}
+		n := &branchNode[N, T]{node: node[N, T]{icow: tr.icow, kind: branch, rects: make([]rect[N], maxEntries)}, children: make([]*node[N, T], maxEntries)}
 		return (*node[N, T])(unsafe.Pointer(n))
 	}
 }
