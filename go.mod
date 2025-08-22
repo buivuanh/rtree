@@ -1,4 +1,4 @@
-module github.com/tidwall/rtree
+module github.com/buivuanh/rtree
 
 go 1.18
 
